@@ -118,7 +118,7 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
 
-def get_model_and_tokenizer(model_id: str, bnb_config: BitsAndBytesConfig, lora_config: LoraConfig, SQL_SPECIAL_TOKENS: dict):
+def get_model_and_tokenizer(model_id: str, bnb_config: BitsAndBytesConfig, lora_config: LoraConfig):
     tokenizer = get_tokenizer(model_id)
     model = get_model(model_id, bnb_config)
     add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
