@@ -9,7 +9,7 @@ import datasets
 import torch
 
 from torch import nn
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, Dataset
 from tqdm import tqdm
 from transformers import PreTrainedModel, Trainer, TrainingArguments
 from transformers.trainer_pt_utils import IterableDatasetShard
@@ -126,6 +126,29 @@ class SFTTrainer(Trainer):
         dataloader = DataLoader(
             train_dataset,
             batch_size=self.args.per_device_train_batch_size,
+            sampler=None,
+            collate_fn=data_collator,
+        )
+        return dataloader
+    
+    def get_eval_dataloader(self, eval_dataset: Optional[Dataset] = None) -> DataLoader:
+        """
+        Returns the evaluation [`~torch.utils.data.DataLoader`].
+
+        Subclass and override this method if you want to inject some custom behavior.
+
+        Args:
+            eval_dataset (`torch.utils.data.Dataset`, *optional*):
+                If provided, will override `self.eval_dataset`. If it is a [`~datasets.Dataset`], columns not accepted
+                by the `model.forward()` method are automatically removed. It must implement `__len__`.
+        """
+        if eval_dataset is None and self.eval_dataset is None:
+            raise ValueError("Trainer: evaluation requires an eval_dataset.")
+        eval_dataset = eval_dataset if eval_dataset is not None else self.eval_dataset
+        data_collator = self.data_collator
+        dataloader = DataLoader(
+            eval_dataset,
+            batch_size=self.args.per_device_eval_batch_size,
             sampler=None,
             collate_fn=data_collator,
         )
