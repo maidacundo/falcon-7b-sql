@@ -132,7 +132,7 @@ class SFTTrainer(Trainer):
         return dataloader
     
     def get_eval_dataloader(self, eval_dataset):
-        data_collator = self.collate_fn
+        data_collator = self.data_collator
         dataloader = DataLoader(
             eval_dataset,
             batch_size=self.args.per_device_eval_batch_size,
