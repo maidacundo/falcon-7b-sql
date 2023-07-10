@@ -28,10 +28,9 @@ class DialogueDataCollator:
 
     def __post_init__(self):
         assert self.tokenizer.eos_token
-
         if self.use_system_prefix:
             assert self.system_prefix
-            self.system_prefix = self.tokenizer(
+            self.system_prefix = self.tokenizer.encode(
                 self.system_prefix + self.tokenizer.eos_token,
                 add_special_tokens=False,
                 return_tensors="np",

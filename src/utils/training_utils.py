@@ -20,7 +20,6 @@ def set_seed(seed: int):
     np.random.seed(seed)
     random.seed(seed)
     torch.backends.cudnn.deterministic = True
-    set_seed(42)
 
 def get_device():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
