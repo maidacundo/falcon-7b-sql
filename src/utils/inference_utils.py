@@ -72,16 +72,15 @@ def generate_pipeline(pipeline,
     results = []
     for batch in tqdm(inference_dataloader):
         out = pipeline(batch,
-                        do_sample=False,
-                        max_new_tokens=max_new_tokens,
-                        temperature=0.2,
-                        top_k=3,
-                        top_p=0.9,
-                        repetition_penalty=1.2,
-                        num_return_sequences=1,
-                        eos_token_id=eos_token_id,
-                        pad_token_id=pad_token_id,
-                        )
+                       do_sample=False,
+                       max_new_tokens=max_new_tokens,
+                       temperature=0.2,
+                       top_k=3,
+                       top_p=0.9,
+                       repetition_penalty=1.2,
+                       num_return_sequences=1,
+                       eos_token_id=eos_token_id,
+                       pad_token_id=pad_token_id,)
         for res in out:
             prediction = res[0]['generated_text'].split('<|sql|>')[-1]
             results.append(prediction)

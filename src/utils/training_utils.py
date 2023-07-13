@@ -1,6 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, set_seed
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Optional
 import numpy as np
 import random
 from peft import prepare_model_for_kbit_training
@@ -26,7 +26,10 @@ def get_device():
     return device
 
 def get_model(model_id: str, bnb_config: BitsAndBytesConfig):
-    model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=bnb_config, device_map={"":0}, trust_remote_code=True)
+    if bnb_config is None:
+        model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+    else:   
+        model = AutoModelForCausalLM.from_pretrained(model_id, quantization_config=bnb_config, device_map={"":0}, trust_remote_code=True)
     return model
 
 def get_tokenizer(model_id: str):
@@ -117,7 +120,7 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
 
-def get_model_and_tokenizer(model_id: str, bnb_config: BitsAndBytesConfig, lora_config: LoraConfig):
+def get_model_and_tokenizer(model_id: str, bnb_config: Optional[BitsAndBytesConfig], lora_config: LoraConfig):
     tokenizer = get_tokenizer(model_id)
     model = get_model(model_id, bnb_config)
     add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
@@ -127,11 +130,16 @@ def get_model_and_tokenizer(model_id: str, bnb_config: BitsAndBytesConfig, lora_
     print_trainable_parameters(model)
     return model, tokenizer
 
-def get_pretrained_model_and_tokenizer(model_id: str, bnb_config, lora_id: str):
+def get_pretrained_model_and_tokenizer(model_id: str, bnb_config: Optional[BitsAndBytesConfig], lora_id: str, add_embeddings: bool = True):
     tokenizer = get_tokenizer(model_id)
     model = get_model(model_id, bnb_config)
-    add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
-    model.gradient_checkpointing_enable()
-    model = prepare_model_for_kbit_training(model)
-    model = PeftModel.from_pretrained(model, lora_id, torch_dtype=torch.float16)
+    
+    if add_embeddings:
+        add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
+
+    if lora_id:
+        model.gradient_checkpointing_enable()
+        model = prepare_model_for_kbit_training(model)
+        model = PeftModel.from_pretrained(model, lora_id, torch_dtype=torch.float16)
+
     return model, tokenizer
