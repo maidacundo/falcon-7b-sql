@@ -56,7 +56,7 @@ def generate(model, tokenizer, inference_dataloader, max_length=512, max_new_tok
                 use_cache=True,
             )
         for output in outputs:
-            output = tokenizer.decode(output, skip_special_tokens=True).split('<|sql|>')[-1]
+            output = tokenizer.decode(output).split('<|sql|>')[-1]
             results.append(output)
         if limit_generation is not None and len(results) >= limit_generation:
             break
