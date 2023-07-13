@@ -87,4 +87,5 @@ def generate_pipeline(pipeline,
 
         if limit_generation is not None and len(results) >= limit_generation:
             break
+    return results
     
