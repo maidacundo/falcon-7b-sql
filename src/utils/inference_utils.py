@@ -31,7 +31,7 @@ def get_pipeline(model, tokenizer):
     )
     return pipeline
 
-def generate(model, tokenizer, inference_dataloader, max_length=512, max_new_tokens=20):  
+def generate(model, tokenizer, inference_dataloader, max_length=512, max_new_tokens=20, limit_generation=None):  
     stopping_criteria = get_stopping_criteria(tokenizer)
     results = []
 
@@ -58,12 +58,15 @@ def generate(model, tokenizer, inference_dataloader, max_length=512, max_new_tok
         for output in outputs:
             output = tokenizer.decode(output, skip_special_tokens=True).split('<|sql|>')[-1]
             results.append(output)
+        if limit_generation is not None and len(results) >= limit_generation:
+            break
     return results
 
 def generate_pipeline(pipeline, 
                       inference_dataloader, 
                       eos_token_id,
                       pad_token_id,
+                      limit_generation=None
                       ):
     results = []
     for batch in tqdm(inference_dataloader):
@@ -78,6 +81,10 @@ def generate_pipeline(pipeline,
                         eos_token_id=eos_token_id,
                         pad_token_id=pad_token_id,
                         )
-    for res in out:
-        prediction = res[0]['generated_text'].split('<|sql|>')[-1]
-        results.append(prediction)
+        for res in out:
+            prediction = res[0]['generated_text'].split('<|sql|>')[-1]
+            results.append(prediction)
+
+        if limit_generation is not None and len(results) >= limit_generation:
+            break
+    
