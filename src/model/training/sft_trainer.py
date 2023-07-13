@@ -120,7 +120,7 @@ class SFTTrainer(Trainer):
 
         return (loss, logits, labels)
 
-    def get_train_dataloader(self):
+    def get_train_dataloader(self) -> DataLoader:
         data_collator = self.train_collate_fn
         train_dataset = self.train_dataset
         dataloader = DataLoader(
@@ -132,18 +132,9 @@ class SFTTrainer(Trainer):
         return dataloader
     
     def get_eval_dataloader(self, eval_dataset: Optional[Dataset] = None) -> DataLoader:
-        """
-        Returns the evaluation [`~torch.utils.data.DataLoader`].
-
-        Subclass and override this method if you want to inject some custom behavior.
-
-        Args:
-            eval_dataset (`torch.utils.data.Dataset`, *optional*):
-                If provided, will override `self.eval_dataset`. If it is a [`~datasets.Dataset`], columns not accepted
-                by the `model.forward()` method are automatically removed. It must implement `__len__`.
-        """
         if eval_dataset is None and self.eval_dataset is None:
             raise ValueError("Trainer: evaluation requires an eval_dataset.")
+        
         eval_dataset = eval_dataset if eval_dataset is not None else self.eval_dataset
         data_collator = self.data_collator
         dataloader = DataLoader(
@@ -152,4 +143,5 @@ class SFTTrainer(Trainer):
             sampler=None,
             collate_fn=data_collator,
         )
+        self.evaluate
         return dataloader
