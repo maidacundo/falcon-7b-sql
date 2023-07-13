@@ -127,10 +127,11 @@ def get_model_and_tokenizer(model_id: str, bnb_config: BitsAndBytesConfig, lora_
     print_trainable_parameters(model)
     return model, tokenizer
 
-def get_pretraineed_model_and_tokenizer(model_id: str, bnb_config: BitsAndBytesConfig, lora_id: str):
+def get_pretrained_model_and_tokenizer(model_id: str, bnb_config, lora_id: str):
     tokenizer = get_tokenizer(model_id)
     model = get_model(model_id, bnb_config)
     add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
     model.gradient_checkpointing_enable()
     model = prepare_model_for_kbit_training(model)
-    model_lora = PeftModel.from_pretrained(model, lora_id, torch_dtype=torch.float16)
+    model = PeftModel.from_pretrained(model, lora_id, torch_dtype=torch.float16)
+    return model, tokenizer

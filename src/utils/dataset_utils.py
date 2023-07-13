@@ -2,6 +2,8 @@ from typing import Optional
 import pandas as pd
 from datasets import load_dataset
 from utils.training_utils import SQL_SPECIAL_TOKENS
+from torch.utils.data import Dataset
+import torch
 
 def get_spider_schemas(table_json: str):
     schema_df = pd.read_json(table_json)
@@ -113,3 +115,20 @@ def get_dataset(dataset_name: str, table_json: str, use_fields: bool = False):
         remove_columns=dataset["train"].column_names,
     )
     return dataset
+
+class InferenceDataset(Dataset):
+
+    def __init__(self, dataset, prefix = 'Convert text into SQL statements by providing a database schema and a query, and generate the corresponding SQL statement.'):
+        self.dataset = dataset
+        self.prefix = prefix
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        if torch.is_tensor(idx):
+            idx = idx.tolist()
+
+        sample = self.dataset[idx]
+
+        return self.prefix + sample['input_text'].split('<|sql|>')[0] + '<|sql|>'
