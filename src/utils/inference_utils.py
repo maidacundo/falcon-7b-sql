@@ -66,13 +66,14 @@ def generate_pipeline(pipeline,
                       inference_dataloader, 
                       eos_token_id,
                       pad_token_id,
-                      limit_generation=None
+                      limit_generation=None,
+                      max_new_tokens=20,
                       ):
     results = []
     for batch in tqdm(inference_dataloader):
         out = pipeline(batch,
                         do_sample=False,
-                        max_length=512,
+                        max_new_tokens=max_new_tokens,
                         temperature=0.2,
                         top_k=3,
                         top_p=0.9,
