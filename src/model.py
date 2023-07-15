@@ -1,25 +1,9 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, set_seed
-from typing import List, NamedTuple, Optional
-import numpy as np
-import random
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from typing import Optional
 from peft import prepare_model_for_kbit_training
 from peft import LoraConfig, get_peft_model, PeftModel
-
-
-SQL_SPECIAL_TOKENS = {
-    'schema': '<|schema|>',
-    'query': '<|query|>',
-    'sql': '<|sql|>',
-    'endoftext': '<|endoftext|>',
-}
-
-def set_seed(seed: int):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
+from data.utils import SQL_SPECIAL_TOKENS
 
 def get_device():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -37,7 +21,10 @@ def get_tokenizer(model_id: str):
     return tokenizer
 
 def add_special_tokens_to_tokenizer(tokenizer, SQL_SPECIAL_TOKENS):
-    # add special tokens to the tokenizer
+    """
+    Add special tokens to the tokenizer
+    """
+    
     tokenizer.add_special_tokens(
         {
             "pad_token": tokenizer.eos_token,
@@ -58,6 +45,11 @@ def add_special_tokens_to_tokenizer(tokenizer, SQL_SPECIAL_TOKENS):
     return tokenizer, num_special_tokens
 
 def add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS):
+    """
+    Adds the special tokens embeddings to the model.
+    Embeddings are calculated as the mean of the sub-words embeddings.
+    """
+
     # map new tokens
     new_tokens_ids = {}
 
@@ -121,6 +113,13 @@ def print_trainable_parameters(model):
     )
 
 def get_model_and_tokenizer(model_id: str, bnb_config: Optional[BitsAndBytesConfig], lora_config: LoraConfig):
+    """
+    Returns the model and tokenizer for the given model_id.
+
+    model_id: The model id to load.
+    bnb_config: BitsAndBytesConfig to quantize the model.
+    lora_config: LoraConfig to configure the model with LoRA.
+    """
     tokenizer = get_tokenizer(model_id)
     model = get_model(model_id, bnb_config)
     add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
@@ -133,7 +132,7 @@ def get_model_and_tokenizer(model_id: str, bnb_config: Optional[BitsAndBytesConf
 def get_pretrained_model_and_tokenizer(model_id: str, bnb_config: Optional[BitsAndBytesConfig], lora_id: str, add_embeddings: bool = True):
     tokenizer = get_tokenizer(model_id)
     model = get_model(model_id, bnb_config)
-    
+
     if add_embeddings:
         add_embeddings_to_model(model, tokenizer, SQL_SPECIAL_TOKENS)
 

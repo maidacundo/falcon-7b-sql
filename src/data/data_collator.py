@@ -7,7 +7,7 @@ import torch
 
 from torch.nn import functional as F
 from transformers.tokenization_utils_base import PaddingStrategy, PreTrainedTokenizerBase, TruncationStrategy
-from utils.training_utils import SQL_SPECIAL_TOKENS
+from data.utils import SQL_SPECIAL_TOKENS
 
 @dataclass
 class DialogueDataCollator:

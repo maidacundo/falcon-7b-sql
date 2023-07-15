@@ -2,8 +2,7 @@ import transformers
 import torch
 from tqdm import tqdm
 from transformers import StoppingCriteriaList, StoppingCriteria
-
-STOP_WORDS = [';', ');', '\';', '";']
+from data.utils import STOP_WORDS
 
 class KeywordsStoppingCriteria(StoppingCriteria):
     def __init__(self, keywords_ids:list):
@@ -14,8 +13,8 @@ class KeywordsStoppingCriteria(StoppingCriteria):
             return True
         return False
 
-def get_stopping_criteria(tokenizer):
-    stop_ids = [tokenizer.encode(w)[0] for w in STOP_WORDS]
+def get_stopping_criteria(tokenizer, stop_words=STOP_WORDS):
+    stop_ids = [tokenizer.encode(w)[0] for w in stop_words]
     keyword_criteria = KeywordsStoppingCriteria(stop_ids)
     stopping_criteria = StoppingCriteriaList([keyword_criteria])
     return stopping_criteria
@@ -37,7 +36,7 @@ def generate(model, tokenizer, inference_dataloader, max_length=512, max_new_tok
 
     generation_config = model.generation_config
     generation_config.max_new_tokens = max_new_tokens
-    generation_config.tempeture = 0 
+    generation_config.tempeture = 0.2
     generation_config.num_return_sequences = 1
     generation_config.pad_token_id = tokenizer.eos_token_id
     generation_config.eos_token_id = tokenizer.eos_token_id
@@ -45,7 +44,7 @@ def generate(model, tokenizer, inference_dataloader, max_length=512, max_new_tok
     
     
     for batch in tqdm(inference_dataloader):
-        encoding = tokenizer(batch, return_tensors="pt")
+        encoding = tokenizer(batch, return_tensors="pt").to(model.device)
         with torch.inference_mode():
             outputs = model.generate(
                 input_ids=encoding["input_ids"],
