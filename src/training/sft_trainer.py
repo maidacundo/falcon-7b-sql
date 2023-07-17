@@ -21,7 +21,6 @@ class SFTTrainer(Trainer):
         model: Union[PreTrainedModel, nn.Module] = None,
         args: TrainingArguments = None,
         sampler: torch.utils.data.sampler.Sampler = None,
-        poly_eps: float = 1.0,
         train_collate_fn: Callable = None,
         **kwargs,
     ):
@@ -82,7 +81,7 @@ class SFTTrainer(Trainer):
 
     def get_train_dataloader(self) -> DataLoader:
         if self.train_dataset is None:
-            raise ValueError("Trainer: evaluation requires an eval_dataset.")
+            raise ValueError("Trainer: training requires an train_dataset.")
         
         data_collator = self.train_collate_fn
         train_dataset = self.train_dataset

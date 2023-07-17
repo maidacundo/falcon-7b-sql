@@ -1,8 +1,6 @@
-from typing import Optional
 from data.utils import SQL_SPECIAL_TOKENS
-from data.dataset_handler import SpiderSchema
 
-def generate_prompt(examples, spider_schemas: Optional[SpiderSchema], use_fields=False):
+def generate_prompt(examples, spider_schemas, use_fields=False):
     """
     Generates the prompt for the given example as follows:
     <|schema|> DATABASE STRUCTURE <|query|> NATURAL LANGUAGE QUESTION <|sql|> SQL QUERY <|endoftext|>
