@@ -15,6 +15,10 @@ def compute_metrics(eval_pred, preprocess_fns, metrics):
 
     return out
 
+def preprocess_logits_for_metrics(logits, labels):
+    pred_ids = torch.argmax(logits, dim=-1)
+    return pred_ids
+
 class SFTTrainer(Trainer):
     def __init__(
         self,
