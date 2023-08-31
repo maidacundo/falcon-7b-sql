@@ -101,6 +101,9 @@ class SpiderSchema:
                                     'Second Table Foreign Key'])
         return spider_schema, spider_primary, spider_foreign
 
+    @staticmethod
+    def get_schemas_linking(table_json: str):
+        pass
 
 def get_dataset(table_json: str, dataset_name: str='spider', use_fields: bool = False):
 
